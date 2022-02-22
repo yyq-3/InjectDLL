@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <string>
+#include <shellapi.h>
 
 #define WECHAT_PROCESS_NAME "WeChat.exe"
 #define INJECT_DLL_NAME "WXMessage.dll"
@@ -22,6 +23,7 @@ VOID UnDll();
 
 LPVOID dllAddr;
 DWORD modelBaseAddr;
+CHAR PATH[MAX_PATH];
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -46,6 +48,21 @@ INT_PTR CALLBACK Dlgproc(HWND unnamedParam1, UINT unnamedParam2, WPARAM unnamedP
     case WM_COMMAND:
         button_click(unnamedParam3);
         break;
+    case WM_DROPFILES:
+        {
+            ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+            ChangeWindowMessageFilter(0x0049, MSGFLT_ADD);
+            HDROP hDrop = (HDROP)unnamedParam3;
+            UINT res = DragQueryFile(hDrop, 0, PATH, MAX_PATH);
+            if (res == 0)
+            {
+                MessageBox(NULL, "读取拖拽文件失败", "提示", 0);
+                break;
+            }
+            MessageBox(NULL, "拖拽了文件", "提示", 0);
+            DragFinish(hDrop);
+            break;
+        }
     default:
         break;
     }
