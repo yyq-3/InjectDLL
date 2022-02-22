@@ -7,6 +7,8 @@
 #include "resource1.h"
 #include <TlHelp32.h>
 #include <stdio.h>
+#include <direct.h>
+#include <string>
 
 #define WECHAT_PROCESS_NAME "WeChat.exe"
 #define INJECT_DLL_NAME "WXMessage.dll"
@@ -105,7 +107,16 @@ DWORD FindDllBaseAddrByDllName(DWORD PID, LPCSTR DllName) {
 }
 
 VOID InjectDLL() {
-    CHAR pathStr[0x100] = { "E://WXMessage.dll" };
+    char* pathStr;
+    pathStr = _getcwd(NULL, 0);
+    if (NULL == pathStr)
+    {
+        MessageBox(NULL, "获取运行目录失败", "错误", 0);
+        return;
+    }
+    std::string path = pathStr;
+    path = path + "\\" + "WXMessage.dll";
+    OutputDebugString(path.c_str());
     // 1.取进程PID
     DWORD PID = FindPIDByProcessName(WECHAT_PROCESS_NAME);
     if (PID == 0)
